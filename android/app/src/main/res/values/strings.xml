@@ -1,7 +1,5 @@
-<?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Quran Verses Widget</string>
-    <string name="title_activity_main">Quran Verses Widget</string>
-    <string name="package_name">com.quranwidget.app</string>
-    <string name="custom_url_scheme">com.quranwidget.app</string>
+  <string name="app_name">Quran Verses Widget</string>
+  <string name="expo_splash_screen_resize_mode" translatable="false">contain</string>
+  <string name="expo_splash_screen_status_bar_translucent" translatable="false">false</string>
 </resources>
