@@ -8,12 +8,14 @@ import {
     Switch,
     Alert,
     ActivityIndicator,
-    Platform
+    Platform,
+    Modal
 } from 'react-native';
 
 import { storageService } from '../services/storage';
 import { verseManager } from '../services/verseManager';
 import { AppSettings } from '../types';
+import Widget from '../components/Widget';
 
 // Simple picker component for React Native
 const SimplePicker: React.FC<{
@@ -27,7 +29,7 @@ const SimplePicker: React.FC<{
     const selectedOption = options.find(option => option.props.value === selectedValue);
 
     return (
-        <View>
+        <>
             <TouchableOpacity
                 style={styles.pickerButton}
                 onPress={() => setIsOpen(true)}
@@ -38,31 +40,43 @@ const SimplePicker: React.FC<{
                 <Text style={styles.pickerArrow}>▼</Text>
             </TouchableOpacity>
 
-            {isOpen && (
-                <View style={styles.pickerOptions}>
-                    {options.map((option, index) => (
-                        <TouchableOpacity
-                            key={index}
-                            style={[
-                                styles.pickerOption,
-                                option.props.value === selectedValue && styles.selectedOption
-                            ]}
-                            onPress={() => {
-                                onValueChange(option.props.value);
-                                setIsOpen(false);
-                            }}
-                        >
-                            <Text style={[
-                                styles.pickerOptionText,
-                                option.props.value === selectedValue && styles.selectedOptionText
-                            ]}>
-                                {option.props.label}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-            )}
-        </View>
+            <Modal
+                visible={isOpen}
+                transparent={true}
+                animationType="fade"
+                onRequestClose={() => setIsOpen(false)}
+            >
+                <TouchableOpacity
+                    style={styles.modalOverlay}
+                    activeOpacity={1}
+                    onPress={() => setIsOpen(false)}
+                >
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Select Option</Text>
+                        {options.map((option, index) => (
+                            <TouchableOpacity
+                                key={index}
+                                style={[
+                                    styles.modalOption,
+                                    option.props.value === selectedValue && styles.selectedModalOption
+                                ]}
+                                onPress={() => {
+                                    onValueChange(option.props.value);
+                                    setIsOpen(false);
+                                }}
+                            >
+                                <Text style={[
+                                    styles.modalOptionText,
+                                    option.props.value === selectedValue && styles.selectedModalOptionText
+                                ]}>
+                                    {option.props.label}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+        </>
     );
 };
 
@@ -71,6 +85,7 @@ const PickerItem: React.FC<{ label: string; value: string }> = ({ label, value }
 const Settings: React.FC = () => {
     const [settings, setSettings] = useState<AppSettings | null>(null);
     const [loading, setLoading] = useState(true);
+    const [widgetSectionExpanded, setWidgetSectionExpanded] = useState(false);
 
     useEffect(() => {
         loadSettings();
@@ -219,42 +234,87 @@ const Settings: React.FC = () => {
                         />
                     </View>
 
-                    <View style={styles.settingItem}>
-                        <Text style={styles.settingLabel}>Widget Theme</Text>
-                        <SimplePicker
-                            selectedValue={settings.widgetTheme}
-                            onValueChange={(value) => updateSetting('widgetTheme', value)}
-                        >
-                            <PickerItem label="Light" value="light" />
-                            <PickerItem label="Dark" value="dark" />
-                            <PickerItem label="Auto" value="auto" />
-                        </SimplePicker>
-                    </View>
                 </View>
 
                 {/* Widget Settings */}
                 <View style={styles.card}>
-                    <Text style={styles.cardTitle}>Widget Settings</Text>
+                    <TouchableOpacity
+                        style={styles.expandableHeader}
+                        onPress={() => setWidgetSectionExpanded(!widgetSectionExpanded)}
+                    >
+                        <Text style={[styles.cardTitle, { marginBottom: 0 }]}>Widget Settings</Text>
+                        <Text style={styles.expandArrow}>
+                            {widgetSectionExpanded ? '▼' : '▶'}
+                        </Text>
+                    </TouchableOpacity>
 
-                    <View style={styles.settingItem}>
-                        <Text style={styles.settingLabel}>Show Arabic in Widget</Text>
-                        <Switch
-                            value={settings.showArabic}
-                            onValueChange={(value) => updateSetting('showArabic', value)}
-                            trackColor={{ false: '#767577', true: '#81b0ff' }}
-                            thumbColor={settings.showArabic ? '#0066cc' : '#f4f3f4'}
-                        />
-                    </View>
+                    {widgetSectionExpanded && (
+                        <View style={styles.expandableContent}>
+                            <View style={styles.settingItem}>
+                                <Text style={styles.settingLabel}>Widget Theme</Text>
+                                <SimplePicker
+                                    selectedValue={settings.widgetTheme}
+                                    onValueChange={(value) => updateSetting('widgetTheme', value)}
+                                >
+                                    <PickerItem label="Light" value="light" />
+                                    <PickerItem label="Dark" value="dark" />
+                                    <PickerItem label="Auto" value="auto" />
+                                </SimplePicker>
+                            </View>
 
-                    <View style={styles.settingItem}>
-                        <Text style={styles.settingLabel}>Show Translation in Widget</Text>
-                        <Switch
-                            value={settings.showTranslation}
-                            onValueChange={(value) => updateSetting('showTranslation', value)}
-                            trackColor={{ false: '#767577', true: '#81b0ff' }}
-                            thumbColor={settings.showTranslation ? '#0066cc' : '#f4f3f4'}
-                        />
-                    </View>
+                            <View style={styles.settingItem}>
+                                <Text style={styles.settingLabel}>Show Arabic Text in Widget</Text>
+                                <Switch
+                                    value={settings.showArabic}
+                                    onValueChange={(value) => updateSetting('showArabic', value)}
+                                    trackColor={{ false: '#767577', true: '#2dd36f' }}
+                                    thumbColor={settings.showArabic ? '#ffffff' : '#f4f3f4'}
+                                />
+                            </View>
+
+                            <View style={styles.settingItem}>
+                                <Text style={styles.settingLabel}>Show Translation in Widget</Text>
+                                <Switch
+                                    value={settings.showTranslation}
+                                    onValueChange={(value) => updateSetting('showTranslation', value)}
+                                    trackColor={{ false: '#767577', true: '#2dd36f' }}
+                                    thumbColor={settings.showTranslation ? '#ffffff' : '#f4f3f4'}
+                                />
+                            </View>
+
+                            <Text style={styles.sectionSubtitle}>Widget Preview</Text>
+
+                            <View style={styles.widgetContainer}>
+                                <Text style={styles.widgetLabel}>Small Widget</Text>
+                                <Widget size="small" theme={settings.widgetTheme} />
+
+                                <Text style={styles.widgetLabel}>Medium Widget</Text>
+                                <Widget size="medium" theme={settings.widgetTheme} />
+
+                                <Text style={styles.widgetLabel}>Large Widget</Text>
+                                <Widget size="large" theme={settings.widgetTheme} />
+                            </View>
+
+                            <TouchableOpacity
+                                style={[styles.button, styles.buttonOutline]}
+                                onPress={() => {
+                                    if (Platform.OS === 'android') {
+                                        Alert.alert(
+                                            'Android Widget Setup',
+                                            '1. Long press on your home screen\n2. Tap "Widgets"\n3. Find "Quran Verses" widget\n4. Drag it to your home screen\n5. Choose your preferred size'
+                                        );
+                                    } else if (Platform.OS === 'ios') {
+                                        Alert.alert(
+                                            'iOS Widget Setup',
+                                            '1. Long press on your home screen\n2. Tap the "+" button\n3. Search for "Quran Verses"\n4. Choose your widget size\n5. Tap "Add Widget"'
+                                        );
+                                    }
+                                }}
+                            >
+                                <Text style={styles.buttonText}>📱 How to Add Widget</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
                 </View>
 
                 {/* Refresh Settings */}
@@ -298,7 +358,21 @@ const Settings: React.FC = () => {
                     <Text style={styles.cardTitle}>About</Text>
                     <Text style={styles.aboutText}>Quran Verses Widget v1.0.0</Text>
                     <Text style={styles.aboutText}>A beautiful way to read random Quran verses daily.</Text>
-                    <Text style={styles.aboutText}>Data source: QuranAPI</Text>
+                    <TouchableOpacity
+                        onPress={() => {
+                            import('react-native').then(({ Linking }) => {
+                                Linking.openURL('https://quranapi.pages.dev/');
+                            });
+                        }}
+                    >
+                        <Text>
+                            Source:
+                            <Text style={[styles.aboutText, { color: '#0066cc', textDecorationLine: 'underline' }]}>
+                                QuranAPI
+                            </Text>
+
+                        </Text>
+                    </TouchableOpacity>
                 </View>
             </ScrollView>
         </View>
@@ -397,32 +471,50 @@ const styles = StyleSheet.create({
         color: '#666',
         marginLeft: 8,
     },
-    pickerOptions: {
-        position: 'absolute',
-        top: '100%',
-        left: 0,
-        right: 0,
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
         backgroundColor: 'white',
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 4,
-        zIndex: 1000,
+        borderRadius: 8,
+        padding: 16,
+        minWidth: 200,
+        maxWidth: 300,
+        marginHorizontal: 20,
         elevation: 5,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
     },
-    pickerOption: {
-        paddingHorizontal: 12,
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 16,
+        textAlign: 'center',
+    },
+    modalOption: {
         paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
+        paddingHorizontal: 16,
+        borderRadius: 4,
+        marginBottom: 4,
     },
-    selectedOption: {
+    selectedModalOption: {
         backgroundColor: '#e3f2fd',
     },
-    pickerOptionText: {
+    modalOptionText: {
         fontSize: 16,
         color: '#333',
+        textAlign: 'center',
     },
-    selectedOptionText: {
+    selectedModalOptionText: {
         color: '#0066cc',
         fontWeight: '500',
     },
@@ -458,6 +550,37 @@ const styles = StyleSheet.create({
         color: '#666',
         marginBottom: 4,
         lineHeight: 20,
+    },
+    expandableHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 8,
+    },
+    expandArrow: {
+        fontSize: 18,
+        color: '#666',
+        fontWeight: 'bold',
+        lineHeight: 22,
+    },
+    expandableContent: {
+        marginTop: 16,
+    },
+    sectionSubtitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
+        marginVertical: 12,
+    },
+    widgetContainer: {
+        marginVertical: 8,
+    },
+    widgetLabel: {
+        fontSize: 14,
+        fontWeight: '500',
+        color: '#666',
+        marginTop: 16,
+        marginBottom: 8,
     },
 });
 

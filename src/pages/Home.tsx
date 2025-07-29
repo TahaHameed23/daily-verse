@@ -10,6 +10,7 @@ import {
     ActivityIndicator,
     Switch
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { verseManager } from '../services/verseManager';
 import { storageService } from '../services/storage';
@@ -25,6 +26,7 @@ const Home: React.FC = () => {
     const [refreshing, setRefreshing] = useState(false);
     const [settings, setSettings] = useState<AppSettings | null>(null);
     const [isFavorite, setIsFavorite] = useState(false);
+    const insets = useSafeAreaInsets();
 
     useEffect(() => {
         loadInitialData();
@@ -105,26 +107,6 @@ const Home: React.FC = () => {
         }
     };
 
-    const toggleLanguage = async (field: 'showArabic' | 'showTranslation') => {
-        if (!settings) return;
-
-        const newSettings = {
-            ...settings,
-            [field]: !settings[field]
-        };
-
-        try {
-            await storageService.saveSettings(newSettings);
-            setSettings(newSettings);
-
-            // Update widget with new settings
-            await updateNativeWidget(currentVerse, currentChapter, newSettings);
-        } catch (error) {
-            console.error('Failed to save settings:', error);
-            Alert.alert('Error', 'Failed to save settings');
-        }
-    };
-
     const toggleWidgetTheme = async () => {
         if (!settings) return;
 
@@ -148,7 +130,9 @@ const Home: React.FC = () => {
             console.error('Failed to save theme setting:', error);
             Alert.alert('Error', 'Failed to change theme');
         }
-    }; const updateNativeWidget = async (verse: QuranVerse | null, chapter: Chapter | null, appSettings: AppSettings | null) => {
+    };
+
+    const updateNativeWidget = async (verse: QuranVerse | null, chapter: Chapter | null, appSettings: AppSettings | null) => {
         if (!verse || !chapter || !appSettings) return;
 
         try {
@@ -167,38 +151,6 @@ const Home: React.FC = () => {
         }
     };
 
-    const handleRandomVerse = () => {
-        Alert.alert(
-            'Random Verse',
-            'Get a completely random verse? This will bypass the shuffled sequence.',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Yes',
-                    onPress: async () => {
-                        try {
-                            setLoading(true);
-                            const verseData = await verseManager.getRandomVerse();
-                            setCurrentVerse(verseData.verse);
-                            setCurrentChapter(verseData.chapter);
-
-                            // Check if verse is in favorites
-                            const favorites = await storageService.getFavoriteVerses();
-                            const isInFavorites = favorites.some(fav => fav.verse.surahNo === verseData.verse.surahNo && fav.verse.ayahNo === verseData.verse.ayahNo);
-                            setIsFavorite(isInFavorites);
-
-                            Alert.alert('Success', 'Random verse loaded!');
-                        } catch (error) {
-                            Alert.alert('Error', 'Failed to load random verse');
-                        } finally {
-                            setLoading(false);
-                        }
-                    }
-                }
-            ]
-        );
-    };
-
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
@@ -211,41 +163,15 @@ const Home: React.FC = () => {
     return (
         <ScrollView
             style={styles.container}
+            contentContainerStyle={{
+                paddingBottom: Math.max(insets.bottom, 16)
+            }}
             refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
             }
         >
-            <View style={styles.header}>
+            <View style={[styles.header, { paddingTop: Math.max(insets.top, 20) + 20 }]}>
                 <Text style={styles.title}>Quran Verses</Text>
-            </View>
-
-            {/* Widget Preview */}
-            <View style={styles.widgetSection}>
-                <View style={styles.widgetHeader}>
-                    <View>
-                        <Text style={styles.sectionTitle}>Widget Preview</Text>
-                        <Text style={styles.sectionSubtitle}>See how your verse will appear on the home screen</Text>
-                    </View>
-                    <TouchableOpacity
-                        style={styles.themeToggle}
-                        onPress={() => toggleWidgetTheme()}
-                    >
-                        <Text style={styles.themeToggleText}>
-                            {settings?.widgetTheme === 'dark' ? '🌙' : settings?.widgetTheme === 'auto' ? '�' : '☀️'}
-                        </Text>
-                    </TouchableOpacity>
-                </View>
-
-                {settings && (
-                    <Widget
-                        size="medium"
-                        theme={settings.widgetTheme || 'light'}
-                    />
-                )}
-
-                <Text style={styles.widgetInfo}>
-                    📱 This widget can be added to your device's home screen for quick daily verse access
-                </Text>
             </View>
 
             {currentVerse && currentChapter && settings && (
@@ -256,29 +182,6 @@ const Home: React.FC = () => {
                         showArabic={settings.showArabic}
                         showTranslation={settings.showTranslation}
                     />
-
-                    {/* Language Controls */}
-                    <View style={styles.card}>
-                        <View style={styles.settingRow}>
-                            <Text style={styles.settingLabel}>Show Arabic Text</Text>
-                            <Switch
-                                value={settings.showArabic}
-                                onValueChange={() => toggleLanguage('showArabic')}
-                                trackColor={{ false: '#767577', true: '#2dd36f' }}
-                                thumbColor={settings.showArabic ? '#ffffff' : '#f4f3f4'}
-                            />
-                        </View>
-
-                        <View style={styles.settingRow}>
-                            <Text style={styles.settingLabel}>Show Translation</Text>
-                            <Switch
-                                value={settings.showTranslation}
-                                onValueChange={() => toggleLanguage('showTranslation')}
-                                trackColor={{ false: '#767577', true: '#2dd36f' }}
-                                thumbColor={settings.showTranslation ? '#ffffff' : '#f4f3f4'}
-                            />
-                        </View>
-                    </View>
 
                     {/* Action Buttons */}
                     <View style={styles.buttonRow}>
@@ -304,14 +207,6 @@ const Home: React.FC = () => {
                             </Text>
                         </TouchableOpacity>
                     </View>
-
-                    {/* Random Verse Button */}
-                    <TouchableOpacity
-                        style={[styles.button, styles.randomButton]}
-                        onPress={handleRandomVerse}
-                    >
-                        <Text style={styles.buttonText}>🔀 Random Verse</Text>
-                    </TouchableOpacity>
                 </View>
             )}
         </ScrollView>
@@ -338,7 +233,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#2dd36f',
         paddingVertical: 20,
         paddingHorizontal: 16,
-        paddingTop: 50, // Account for status bar
     },
     title: {
         fontSize: 24,
@@ -359,16 +253,6 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
-    },
-    settingRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingVertical: 8,
-    },
-    settingLabel: {
-        fontSize: 16,
-        color: '#333',
     },
     buttonRow: {
         flexDirection: 'row',
@@ -392,11 +276,6 @@ const styles = StyleSheet.create({
     },
     favoriteButton: {
         backgroundColor: '#e74c3c',
-    },
-    randomButton: {
-        backgroundColor: '#3498db',
-        flex: 1,
-        marginTop: 8,
     },
     buttonText: {
         fontSize: 16,

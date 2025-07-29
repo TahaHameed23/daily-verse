@@ -143,14 +143,14 @@ const Widget: React.FC<WidgetProps> = ({ size = 'medium', theme = 'light' }) => 
             )}
 
             {/* Footer */}
-            <View style={styles.footer}>
+            {/* <View style={styles.footer}>
                 <TouchableOpacity onPress={addToFavorites} style={styles.favoriteButton}>
                     <Text style={styles.favoriteIcon}>❤️</Text>
                 </TouchableOpacity>
                 <Text style={[styles.timestamp, getTextStyles()]}>
                     Daily Verse
                 </Text>
-            </View>
+            </View> */}
         </View>
     );
 };

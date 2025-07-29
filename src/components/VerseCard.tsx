@@ -51,7 +51,7 @@ const VerseCard: React.FC<VerseCardProps> = ({
             <View style={styles.infoContainer}>
                 <Text style={styles.infoText}>
                     <Text style={styles.bold}>Surah:</Text> {chapter.surahNameArabic} ({chapter.surahName}) • {' '}
-                    <Text style={styles.bold}>Verse:</Text> {verse.ayahNo} • {' '}
+                    {/* <Text style={styles.bold}>Verse:</Text> {verse.ayahNo} • {' '} */}
                     <Text style={styles.bold}>Place:</Text> {verse.revelationPlace}
                 </Text>
             </View>
