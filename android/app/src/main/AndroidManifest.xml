@@ -1,4 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.quranwidget.app">
   <uses-permission android:name="android.permission.INTERNET"/>
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
@@ -21,8 +21,6 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
-    
-    <!-- Quran Widget Provider -->
     <receiver android:name=".QuranWidgetProvider" android:exported="true">
       <intent-filter>
         <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
@@ -31,6 +29,5 @@
       </intent-filter>
       <meta-data android:name="android.appwidget.provider" android:resource="@xml/quran_widget_info"/>
     </receiver>
-    
   </application>
 </manifest>

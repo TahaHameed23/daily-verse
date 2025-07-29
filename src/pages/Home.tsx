@@ -13,7 +13,6 @@ import {
 
 import { verseManager } from '../services/verseManager';
 import { storageService } from '../services/storage';
-import { widgetService } from '../services/widgetService';
 import { QuranVerse, Chapter, AppSettings } from '../types';
 
 import VerseCard from '../components/VerseCard';
@@ -96,10 +95,10 @@ const Home: React.FC = () => {
                 setIsFavorite(true);
                 Alert.alert('Success', 'Added to favorites');
             }
-            
+
             // Update native widget to reflect favorite status change
             await updateNativeWidget(currentVerse, currentChapter, settings);
-            
+
         } catch (error) {
             console.error('Failed to toggle favorite:', error);
             Alert.alert('Error', 'Failed to update favorites');
@@ -126,19 +125,42 @@ const Home: React.FC = () => {
         }
     };
 
-    const updateNativeWidget = async (verse: QuranVerse | null, chapter: Chapter | null, appSettings: AppSettings | null) => {
+    const toggleWidgetTheme = async () => {
+        if (!settings) return;
+
+        const themeOrder: ('light' | 'dark' | 'auto')[] = ['light', 'dark', 'auto'];
+        const currentIndex = themeOrder.indexOf(settings.widgetTheme);
+        const nextIndex = (currentIndex + 1) % themeOrder.length;
+        const newTheme = themeOrder[nextIndex];
+
+        const newSettings = {
+            ...settings,
+            widgetTheme: newTheme
+        };
+
+        try {
+            await storageService.saveSettings(newSettings);
+            setSettings(newSettings);
+            
+            // Update widget with new theme
+            await updateNativeWidget(currentVerse, currentChapter, newSettings);
+        } catch (error) {
+            console.error('Failed to save theme setting:', error);
+            Alert.alert('Error', 'Failed to change theme');
+        }
+    };    const updateNativeWidget = async (verse: QuranVerse | null, chapter: Chapter | null, appSettings: AppSettings | null) => {
         if (!verse || !chapter || !appSettings) return;
 
         try {
-            const chapterInfo = `${chapter.surahName} ${verse.surahNo}:${verse.ayahNo}`;
-            await widgetService.updateWidget(
-                chapterInfo,
-                verse.arabic1,
-                verse.english,
-                appSettings.showArabic,
-                appSettings.showTranslation
-            );
-            console.log('Widget updated successfully');
+            // Native widget functionality would go here
+            // For now, just log that we would update the widget
+            console.log('Would update native widget with:', {
+                chapter: `${chapter.surahName} ${verse.surahNo}:${verse.ayahNo}`,
+                arabic: verse.arabic1,
+                english: verse.english,
+                showArabic: appSettings.showArabic,
+                showTranslation: appSettings.showTranslation
+            });
         } catch (error) {
             console.error('Failed to update widget:', error);
             // Don't show error to user as widget might not be available on all devices
@@ -199,8 +221,20 @@ const Home: React.FC = () => {
 
             {/* Widget Preview */}
             <View style={styles.widgetSection}>
-                <Text style={styles.sectionTitle}>Widget Preview</Text>
-                <Text style={styles.sectionSubtitle}>See how your verse will appear on the home screen</Text>
+                <View style={styles.widgetHeader}>
+                    <View>
+                        <Text style={styles.sectionTitle}>Widget Preview</Text>
+                        <Text style={styles.sectionSubtitle}>See how your verse will appear on the home screen</Text>
+                    </View>
+                    <TouchableOpacity
+                        style={styles.themeToggle}
+                        onPress={() => toggleWidgetTheme()}
+                    >
+                        <Text style={styles.themeToggleText}>
+                            {settings?.widgetTheme === 'dark' ? '🌙' : settings?.widgetTheme === 'auto' ? '�' : '☀️'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
 
                 {settings && (
                     <Widget
@@ -404,6 +438,24 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginTop: 8,
         fontStyle: 'italic',
+    },
+    widgetHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: 16,
+    },
+    themeToggle: {
+        backgroundColor: '#f0f0f0',
+        borderRadius: 20,
+        width: 40,
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginLeft: 16,
+    },
+    themeToggleText: {
+        fontSize: 20,
     },
 });
 

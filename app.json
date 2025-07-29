@@ -7,6 +7,9 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "assetBundlePatterns": [
+      "assets/**/*"
+    ],
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -21,7 +24,10 @@
         "backgroundColor": "#2dd36f"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.quranwidget.app"
+      "package": "com.quranwidget.app",
+      "enableProguardInReleaseBuilds": true,
+      "enableSeparateBuildPerCPUArchitecture": true,
+      "bundle": true
     },
     "web": {
       "favicon": "./assets/favicon.png"

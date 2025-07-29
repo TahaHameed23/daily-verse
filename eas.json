@@ -9,7 +9,11 @@
     },
     "preview": {
       "android": {
-        "buildType": "apk"
+        "buildType": "apk",
+        "image": "latest",
+        "env": {
+          "EXPO_USE_FAST_RESOLVER": "1"
+        }
       }
     },
     "production": {
