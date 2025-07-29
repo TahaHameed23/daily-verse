@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Share, Alert } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import { QuranVerse, Chapter } from '../types';
+// import { QuranVerse, Chapter } from '../types';
 
 interface VerseCardProps {
     verse: QuranVerse;
@@ -56,7 +56,6 @@ const VerseCard: React.FC<VerseCardProps> = ({
         try {
             const shareText = formatShareText();
             await Clipboard.setStringAsync(shareText);
-            Alert.alert('Copied', 'Verse copied to clipboard');
         } catch (error) {
             console.error('Error copying verse:', error);
             Alert.alert('Error', 'Failed to copy verse');
