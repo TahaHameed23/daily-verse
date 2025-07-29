@@ -9,6 +9,10 @@ dist/
 web-build/
 expo-env.d.ts
 
+# React Native / Android
+android/
+ios/
+
 # Native
 .kotlin/
 *.orig.*
