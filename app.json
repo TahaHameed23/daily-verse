@@ -1,31 +1,40 @@
 {
-    "expo": {
-        "name": "Quran Verses Widget",
-        "slug": "quran-verses-widget",
-        "version": "1.0.0",
-        "orientation": "portrait",
-        "icon": "./assets/icon.png",
-        "userInterfaceStyle": "light",
-        "newArchEnabled": true,
-        "splash": {
-            "image": "./assets/splash-icon.png",
-            "resizeMode": "contain",
-            "backgroundColor": "#2dd36f"
-        },
-        "ios": {
-            "supportsTablet": true
-        },
-        "android": {
-            "adaptiveIcon": {
-                "foregroundImage": "./assets/adaptive-icon.png",
-                "backgroundColor": "#2dd36f"
-            },
-            "edgeToEdgeEnabled": true,
-            "package": "com.quranwidget.app"
-        },
-        "web": {
-            "favicon": "./assets/favicon.png"
-        },
-        "platforms": ["ios", "android", "web"]
+  "expo": {
+    "name": "Quran Verses Widget",
+    "slug": "quran-verses-widget",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#2dd36f"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#2dd36f"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.quranwidget.app"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "c8279202-d550-48ae-bfcf-82ca66a7b44b"
+      }
     }
+  }
 }

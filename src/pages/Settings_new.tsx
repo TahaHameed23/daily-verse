@@ -22,7 +22,7 @@ const SimplePicker: React.FC<{
     children: React.ReactNode;
 }> = ({ selectedValue, onValueChange, children }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const options = React.Children.toArray(children) as React.ReactElement<{ label: string; value: string }>[];
+    const options = React.Children.toArray(children) as React.ReactElement[];
 
     const selectedOption = options.find(option => option.props.value === selectedValue);
 
@@ -229,31 +229,6 @@ const Settings: React.FC = () => {
                             <PickerItem label="Dark" value="dark" />
                             <PickerItem label="Auto" value="auto" />
                         </SimplePicker>
-                    </View>
-                </View>
-
-                {/* Widget Settings */}
-                <View style={styles.card}>
-                    <Text style={styles.cardTitle}>Widget Settings</Text>
-                    
-                    <View style={styles.settingItem}>
-                        <Text style={styles.settingLabel}>Show Arabic in Widget</Text>
-                        <Switch
-                            value={settings.showArabic}
-                            onValueChange={(value) => updateSetting('showArabic', value)}
-                            trackColor={{ false: '#767577', true: '#81b0ff' }}
-                            thumbColor={settings.showArabic ? '#0066cc' : '#f4f3f4'}
-                        />
-                    </View>
-                    
-                    <View style={styles.settingItem}>
-                        <Text style={styles.settingLabel}>Show Translation in Widget</Text>
-                        <Switch
-                            value={settings.showTranslation}
-                            onValueChange={(value) => updateSetting('showTranslation', value)}
-                            trackColor={{ false: '#767577', true: '#81b0ff' }}
-                            thumbColor={settings.showTranslation ? '#0066cc' : '#f4f3f4'}
-                        />
                     </View>
                 </View>
 

@@ -16,6 +16,7 @@ import { storageService } from '../services/storage';
 import { QuranVerse, Chapter, AppSettings } from '../types';
 
 import VerseCard from '../components/VerseCard';
+import Widget from '../components/Widget';
 
 const Home: React.FC = () => {
     const [currentVerse, setCurrentVerse] = useState<QuranVerse | null>(null);
@@ -161,6 +162,23 @@ const Home: React.FC = () => {
         >
             <View style={styles.header}>
                 <Text style={styles.title}>Quran Verses</Text>
+            </View>
+
+            {/* Widget Preview */}
+            <View style={styles.widgetSection}>
+                <Text style={styles.sectionTitle}>Widget Preview</Text>
+                <Text style={styles.sectionSubtitle}>See how your verse will appear on the home screen</Text>
+                
+                {settings && (
+                    <Widget 
+                        size="medium" 
+                        theme={settings.widgetTheme || 'light'} 
+                    />
+                )}
+                
+                <Text style={styles.widgetInfo}>
+                    📱 This widget can be added to your device's home screen for quick daily verse access
+                </Text>
             </View>
 
             {currentVerse && currentChapter && settings && (
@@ -323,6 +341,36 @@ const styles = StyleSheet.create({
     },
     favoriteButtonText: {
         color: '#ffffff',
+    },
+    widgetSection: {
+        padding: 16,
+        backgroundColor: '#ffffff',
+        marginHorizontal: 16,
+        marginVertical: 8,
+        borderRadius: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#333',
+        marginBottom: 4,
+    },
+    sectionSubtitle: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 16,
+    },
+    widgetInfo: {
+        fontSize: 12,
+        color: '#666',
+        textAlign: 'center',
+        marginTop: 8,
+        fontStyle: 'italic',
     },
 });
 
