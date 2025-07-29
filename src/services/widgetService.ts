@@ -1,5 +1,5 @@
-import { NativeModules, Platform } from 'react-native';
-import { QuranVerse, Chapter, AppSettings } from '../types';
+import { NativeModules, Platform } from "react-native";
+import { QuranVerse, Chapter, AppSettings } from "../types";
 
 const { QuranWidget } = NativeModules;
 
@@ -9,15 +9,16 @@ export const widgetService = {
         chapter: Chapter,
         settings: AppSettings
     ): Promise<void> => {
-        if (Platform.OS !== 'android' || !QuranWidget) {
-            console.log('Widget service not available on this platform');
+        if (Platform.OS !== "android" || !QuranWidget) {
+            console.log("Widget service not available on this platform");
             return;
         }
 
         try {
             const chapterInfo = `${chapter.surahName} ${verse.surahNo}:${verse.ayahNo}`;
-            const arabicText = verse.arabic1 || '';
-            const translationText = verse.english || 'Translation not available';
+            const arabicText = verse.arabic1 || "";
+            const translationText =
+                verse.english || "Translation not available";
 
             await QuranWidget.updateWidget(
                 chapterInfo,
@@ -27,10 +28,10 @@ export const widgetService = {
                 settings.showTranslation
             );
 
-            console.log('Widget updated successfully');
+            console.log("Widget updated successfully");
         } catch (error) {
-            console.error('Failed to update widget:', error);
+            console.error("Failed to update widget:", error);
             throw error;
         }
-    }
+    },
 };
