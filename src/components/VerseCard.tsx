@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Share, Alert } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-// import { QuranVerse, Chapter } from '../types';
+import { QuranVerse, Chapter } from '../types';
 
 interface VerseCardProps {
     verse: QuranVerse;
