@@ -15,7 +15,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { verseManager } from '../services/verseManager';
 import { storageService } from '../services/storage';
-import { widgetService } from '../services/widgetService';
 import { QuranVerse, Chapter, AppSettings } from '../types';
 
 import VerseCard from '../components/VerseCard';
@@ -149,8 +148,15 @@ const Home: React.FC = () => {
         if (!verse || !chapter || !appSettings) return;
 
         try {
-            await widgetService.updateWidget(verse, chapter, appSettings);
-            console.log('Widget updated successfully');
+            // Native widget functionality would go here
+            // For now, just log that we would update the widget
+            console.log('Would update native widget with:', {
+                chapter: `${chapter.surahName} ${verse.surahNo}:${verse.ayahNo}`,
+                arabic: verse.arabic1,
+                english: verse.english,
+                showArabic: appSettings.showArabic,
+                showTranslation: appSettings.showTranslation
+            });
         } catch (error) {
             console.error('Failed to update widget:', error);
             // Don't show error to user as widget might not be available on all devices
