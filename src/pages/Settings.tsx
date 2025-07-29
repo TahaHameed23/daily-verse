@@ -235,7 +235,7 @@ const Settings: React.FC = () => {
                 {/* Widget Settings */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>Widget Settings</Text>
-                    
+
                     <View style={styles.settingItem}>
                         <Text style={styles.settingLabel}>Show Arabic in Widget</Text>
                         <Switch
@@ -245,7 +245,7 @@ const Settings: React.FC = () => {
                             thumbColor={settings.showArabic ? '#0066cc' : '#f4f3f4'}
                         />
                     </View>
-                    
+
                     <View style={styles.settingItem}>
                         <Text style={styles.settingLabel}>Show Translation in Widget</Text>
                         <Switch

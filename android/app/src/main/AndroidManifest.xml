@@ -21,5 +21,16 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
+    
+    <!-- Quran Widget Provider -->
+    <receiver android:name=".QuranWidgetProvider" android:exported="true">
+      <intent-filter>
+        <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+        <action android:name="com.quranwidget.app.REFRESH"/>
+        <action android:name="com.quranwidget.app.FAVORITE"/>
+      </intent-filter>
+      <meta-data android:name="android.appwidget.provider" android:resource="@xml/quran_widget_info"/>
+    </receiver>
+    
   </application>
 </manifest>

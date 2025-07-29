@@ -29,8 +29,8 @@ const TabIcon: React.FC<{ name: string; focused: boolean }> = ({ name, focused }
 
   return (
     <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-      <Text style={{ 
-        fontSize: 24, 
+      <Text style={{
+        fontSize: 24,
         opacity: focused ? 1 : 0.6,
         color: focused ? '#0066cc' : '#666'
       }}>
@@ -38,7 +38,7 @@ const TabIcon: React.FC<{ name: string; focused: boolean }> = ({ name, focused }
       </Text>
     </View>
   );
-};const App: React.FC = () => {
+}; const App: React.FC = () => {
   return (
     <>
       <NavigationContainer>

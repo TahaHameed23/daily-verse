@@ -13,6 +13,7 @@ import {
 
 import { verseManager } from '../services/verseManager';
 import { storageService } from '../services/storage';
+import { widgetService } from '../services/widgetService';
 import { QuranVerse, Chapter, AppSettings } from '../types';
 
 import VerseCard from '../components/VerseCard';
@@ -48,6 +49,9 @@ const Home: React.FC = () => {
             const isInFavorites = favorites.some(fav => fav.verse.surahNo === verseData.verse.surahNo && fav.verse.ayahNo === verseData.verse.ayahNo);
             setIsFavorite(isInFavorites);
 
+            // Update native widget
+            await updateNativeWidget(verseData.verse, verseData.chapter, appSettings);
+
         } catch (error) {
             console.error('Failed to load initial data:', error);
             Alert.alert('Error', 'Failed to load verse. Please try again.');
@@ -62,6 +66,9 @@ const Home: React.FC = () => {
             const verseData = await verseManager.refreshVerse();
             setCurrentVerse(verseData.verse);
             setCurrentChapter(verseData.chapter);
+
+            // Update native widget with new verse
+            await updateNativeWidget(verseData.verse, verseData.chapter, settings);
 
             // Check if new verse is in favorites
             const favorites = await storageService.getFavoriteVerses();
@@ -89,6 +96,10 @@ const Home: React.FC = () => {
                 setIsFavorite(true);
                 Alert.alert('Success', 'Added to favorites');
             }
+            
+            // Update native widget to reflect favorite status change
+            await updateNativeWidget(currentVerse, currentChapter, settings);
+            
         } catch (error) {
             console.error('Failed to toggle favorite:', error);
             Alert.alert('Error', 'Failed to update favorites');
@@ -106,9 +117,31 @@ const Home: React.FC = () => {
         try {
             await storageService.saveSettings(newSettings);
             setSettings(newSettings);
+            
+            // Update widget with new settings
+            await updateNativeWidget(currentVerse, currentChapter, newSettings);
         } catch (error) {
             console.error('Failed to save settings:', error);
             Alert.alert('Error', 'Failed to save settings');
+        }
+    };
+
+    const updateNativeWidget = async (verse: QuranVerse | null, chapter: Chapter | null, appSettings: AppSettings | null) => {
+        if (!verse || !chapter || !appSettings) return;
+
+        try {
+            const chapterInfo = `${chapter.surahName} ${verse.surahNo}:${verse.ayahNo}`;
+            await widgetService.updateWidget(
+                chapterInfo,
+                verse.arabic1,
+                verse.english,
+                appSettings.showArabic,
+                appSettings.showTranslation
+            );
+            console.log('Widget updated successfully');
+        } catch (error) {
+            console.error('Failed to update widget:', error);
+            // Don't show error to user as widget might not be available on all devices
         }
     };
 
@@ -168,14 +201,14 @@ const Home: React.FC = () => {
             <View style={styles.widgetSection}>
                 <Text style={styles.sectionTitle}>Widget Preview</Text>
                 <Text style={styles.sectionSubtitle}>See how your verse will appear on the home screen</Text>
-                
+
                 {settings && (
-                    <Widget 
-                        size="medium" 
-                        theme={settings.widgetTheme || 'light'} 
+                    <Widget
+                        size="medium"
+                        theme={settings.widgetTheme || 'light'}
                     />
                 )}
-                
+
                 <Text style={styles.widgetInfo}>
                     📱 This widget can be added to your device's home screen for quick daily verse access
                 </Text>

@@ -70,7 +70,7 @@ const Widget: React.FC<WidgetProps> = ({ size = 'medium', theme = 'light' }) => 
 
     const addToFavorites = async () => {
         if (!verse || !chapter) return;
-        
+
         try {
             await storageService.addToFavorites(verse, chapter);
             Alert.alert('Success', 'Added to favorites');
@@ -82,7 +82,7 @@ const Widget: React.FC<WidgetProps> = ({ size = 'medium', theme = 'light' }) => 
 
     const getWidgetStyles = () => {
         const baseStyle = theme === 'dark' ? styles.widgetDark : styles.widgetLight;
-        
+
         switch (size) {
             case 'small':
                 return [baseStyle, styles.widgetSmall];
@@ -189,7 +189,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#333',
     },
-    
+
     // Widget sizes
     widgetSmall: {
         minHeight: 120,

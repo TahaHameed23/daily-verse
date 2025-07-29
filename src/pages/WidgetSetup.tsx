@@ -33,14 +33,14 @@ const WidgetSetup: React.FC = () => {
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Preview</Text>
                 <Text style={styles.sectionSubtitle}>How your widget will look</Text>
-                
+
                 <View style={styles.widgetContainer}>
                     <Text style={styles.widgetLabel}>Small Widget</Text>
                     <Widget size="small" theme="light" />
-                    
+
                     <Text style={styles.widgetLabel}>Medium Widget</Text>
                     <Widget size="medium" theme="light" />
-                    
+
                     <Text style={styles.widgetLabel}>Large Widget</Text>
                     <Widget size="large" theme="light" />
                 </View>
@@ -49,7 +49,7 @@ const WidgetSetup: React.FC = () => {
             {/* Dark Theme Preview */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Dark Theme</Text>
-                
+
                 <View style={styles.widgetContainer}>
                     <Widget size="medium" theme="dark" />
                 </View>
@@ -58,7 +58,7 @@ const WidgetSetup: React.FC = () => {
             {/* Setup Instructions */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Setup Instructions</Text>
-                
+
                 <View style={styles.instructionCard}>
                     <Text style={styles.stepNumber}>1</Text>
                     <View style={styles.stepContent}>
@@ -89,7 +89,7 @@ const WidgetSetup: React.FC = () => {
                     </View>
                 </View>
 
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={styles.setupButton}
                     onPress={openWidgetSettings}
                 >
@@ -100,7 +100,7 @@ const WidgetSetup: React.FC = () => {
             {/* Features */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Widget Features</Text>
-                
+
                 <View style={styles.featureList}>
                     <Text style={styles.feature}>📖 Daily verse updates</Text>
                     <Text style={styles.feature}>🌙 Arabic text display</Text>
