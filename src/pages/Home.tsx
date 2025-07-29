@@ -116,7 +116,7 @@ const Home: React.FC = () => {
         try {
             await storageService.saveSettings(newSettings);
             setSettings(newSettings);
-            
+
             // Update widget with new settings
             await updateNativeWidget(currentVerse, currentChapter, newSettings);
         } catch (error) {
@@ -141,14 +141,14 @@ const Home: React.FC = () => {
         try {
             await storageService.saveSettings(newSettings);
             setSettings(newSettings);
-            
+
             // Update widget with new theme
             await updateNativeWidget(currentVerse, currentChapter, newSettings);
         } catch (error) {
             console.error('Failed to save theme setting:', error);
             Alert.alert('Error', 'Failed to change theme');
         }
-    };    const updateNativeWidget = async (verse: QuranVerse | null, chapter: Chapter | null, appSettings: AppSettings | null) => {
+    }; const updateNativeWidget = async (verse: QuranVerse | null, chapter: Chapter | null, appSettings: AppSettings | null) => {
         if (!verse || !chapter || !appSettings) return;
 
         try {
