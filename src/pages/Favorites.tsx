@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Alert, Animated } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { storageService } from '../services/storage';
 import { QuranVerse, Chapter } from '../types';
@@ -8,6 +9,18 @@ import VerseCard from '../components/VerseCard';
 const Favorites: React.FC = () => {
     const [favorites, setFavorites] = useState<Array<{ verse: QuranVerse; chapter: Chapter }>>([]);
     const [loading, setLoading] = useState(true);
+    const insets = useSafeAreaInsets();
+
+    // Header animation
+    const headerHeight = 80;
+    const headerAnimatedValue = useRef(new Animated.Value(0)).current;
+    const lastScrollY = useRef(0);
+
+    const headerTranslateY = headerAnimatedValue.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, -headerHeight],
+        extrapolate: 'clamp',
+    });
 
     useEffect(() => {
         loadFavorites();
@@ -36,14 +49,48 @@ const Favorites: React.FC = () => {
         }
     };
 
+    const handleScroll = (event: any) => {
+        const currentScrollY = event.nativeEvent.contentOffset.y;
+        const scrollDiff = currentScrollY - lastScrollY.current;
+
+        if (scrollDiff > 5 && currentScrollY > headerHeight) {
+            // Scrolling down - hide header
+            Animated.timing(headerAnimatedValue, {
+                toValue: 1,
+                duration: 200,
+                useNativeDriver: true,
+            }).start();
+        } else if (scrollDiff < -5) {
+            // Scrolling up - show header
+            Animated.timing(headerAnimatedValue, {
+                toValue: 0,
+                duration: 200,
+                useNativeDriver: true,
+            }).start();
+        }
+
+        lastScrollY.current = currentScrollY;
+    };
+
     return (
         <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
             {/* Header */}
-            <View style={{
-                backgroundColor: '#2196F3',
+            <Animated.View style={{
+                backgroundColor: '#2dd36f',
                 padding: 16,
-                paddingTop: 40,
-                alignItems: 'center'
+                paddingTop: Math.max(insets.top, 20) + 16,
+                alignItems: 'center',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                zIndex: 1000,
+                transform: [{ translateY: headerTranslateY }],
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 3,
             }}>
                 <Text style={{
                     color: 'white',
@@ -52,10 +99,17 @@ const Favorites: React.FC = () => {
                 }}>
                     Favorite Verses
                 </Text>
-            </View>
+            </Animated.View>
 
             {/* Content */}
-            <ScrollView style={{ flex: 1, padding: 16 }}>
+            <ScrollView
+                style={{ flex: 1, padding: 16 }}
+                contentContainerStyle={{
+                    paddingTop: headerHeight + Math.max(insets.top, 20) + 16
+                }}
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
+            >
                 {loading ? (
                     <Text style={{ textAlign: 'center', marginTop: 20 }}>
                         Loading favorites...

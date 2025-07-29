@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
     Text,
@@ -9,8 +9,10 @@ import {
     Alert,
     ActivityIndicator,
     Platform,
-    Modal
+    Modal,
+    Animated
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { storageService } from '../services/storage';
 import { verseManager } from '../services/verseManager';
@@ -86,6 +88,18 @@ const Settings: React.FC = () => {
     const [settings, setSettings] = useState<AppSettings | null>(null);
     const [loading, setLoading] = useState(true);
     const [widgetSectionExpanded, setWidgetSectionExpanded] = useState(false);
+    const insets = useSafeAreaInsets();
+
+    // Header animation
+    const headerHeight = 80;
+    const headerAnimatedValue = useRef(new Animated.Value(0)).current;
+    const lastScrollY = useRef(0);
+
+    const headerTranslateY = headerAnimatedValue.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, -headerHeight],
+        extrapolate: 'clamp',
+    });
 
     useEffect(() => {
         loadSettings();
@@ -176,10 +190,33 @@ const Settings: React.FC = () => {
         );
     };
 
+    const handleScroll = (event: any) => {
+        const currentScrollY = event.nativeEvent.contentOffset.y;
+        const scrollDiff = currentScrollY - lastScrollY.current;
+
+        if (scrollDiff > 5 && currentScrollY > headerHeight) {
+            // Scrolling down - hide header
+            Animated.timing(headerAnimatedValue, {
+                toValue: 1,
+                duration: 200,
+                useNativeDriver: true,
+            }).start();
+        } else if (scrollDiff < -5) {
+            // Scrolling up - show header
+            Animated.timing(headerAnimatedValue, {
+                toValue: 0,
+                duration: 200,
+                useNativeDriver: true,
+            }).start();
+        }
+
+        lastScrollY.current = currentScrollY;
+    };
+
     if (loading) {
         return (
             <View style={styles.container}>
-                <View style={styles.header}>
+                <View style={[styles.header, { paddingTop: Math.max(insets.top, 20) + 15 }]}>
                     <Text style={styles.headerTitle}>Settings</Text>
                 </View>
                 <View style={styles.loadingContainer}>
@@ -193,7 +230,7 @@ const Settings: React.FC = () => {
     if (!settings) {
         return (
             <View style={styles.container}>
-                <View style={styles.header}>
+                <View style={[styles.header, { paddingTop: Math.max(insets.top, 20) + 15 }]}>
                     <Text style={styles.headerTitle}>Settings</Text>
                 </View>
                 <View style={styles.loadingContainer}>
@@ -205,11 +242,30 @@ const Settings: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
+            <Animated.View style={[
+                styles.header,
+                {
+                    paddingTop: Math.max(insets.top, 20) + 15,
+                    transform: [{ translateY: headerTranslateY }],
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 1000,
+                }
+            ]}>
                 <Text style={styles.headerTitle}>Settings</Text>
-            </View>
+            </Animated.View>
 
-            <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
+            <ScrollView
+                style={styles.scrollView}
+                contentContainerStyle={[
+                    styles.content,
+                    { paddingTop: headerHeight + Math.max(insets.top, 20) + 15 }
+                ]}
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
+            >
                 {/* Display Settings */}
                 <View style={styles.card}>
                     <Text style={styles.cardTitle}>Display Settings</Text>
@@ -389,6 +445,11 @@ const styles = StyleSheet.create({
         paddingTop: Platform.OS === 'ios' ? 44 : 25,
         paddingBottom: 15,
         paddingHorizontal: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
     },
     headerTitle: {
         fontSize: 20,

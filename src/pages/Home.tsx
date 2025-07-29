@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
     Text,
@@ -8,7 +8,8 @@ import {
     RefreshControl,
     Alert,
     ActivityIndicator,
-    Switch
+    Switch,
+    Animated
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -27,6 +28,17 @@ const Home: React.FC = () => {
     const [settings, setSettings] = useState<AppSettings | null>(null);
     const [isFavorite, setIsFavorite] = useState(false);
     const insets = useSafeAreaInsets();
+
+    // Header animation
+    const headerHeight = 80;
+    const headerAnimatedValue = useRef(new Animated.Value(0)).current;
+    const lastScrollY = useRef(0);
+
+    const headerTranslateY = headerAnimatedValue.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, -headerHeight],
+        extrapolate: 'clamp',
+    });
 
     useEffect(() => {
         loadInitialData();
@@ -151,6 +163,29 @@ const Home: React.FC = () => {
         }
     };
 
+    const handleScroll = (event: any) => {
+        const currentScrollY = event.nativeEvent.contentOffset.y;
+        const scrollDiff = currentScrollY - lastScrollY.current;
+
+        if (scrollDiff > 5 && currentScrollY > headerHeight) {
+            // Scrolling down - hide header
+            Animated.timing(headerAnimatedValue, {
+                toValue: 1,
+                duration: 200,
+                useNativeDriver: true,
+            }).start();
+        } else if (scrollDiff < -5) {
+            // Scrolling up - show header
+            Animated.timing(headerAnimatedValue, {
+                toValue: 0,
+                duration: 200,
+                useNativeDriver: true,
+            }).start();
+        }
+
+        lastScrollY.current = currentScrollY;
+    };
+
     if (loading) {
         return (
             <View style={styles.loadingContainer}>
@@ -161,55 +196,72 @@ const Home: React.FC = () => {
     }
 
     return (
-        <ScrollView
-            style={styles.container}
-            contentContainerStyle={{
-                paddingBottom: Math.max(insets.bottom, 16)
-            }}
-            refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-            }
-        >
-            <View style={[styles.header, { paddingTop: Math.max(insets.top, 20) + 20 }]}>
+        <View style={styles.container}>
+            <Animated.View style={[
+                styles.header,
+                {
+                    paddingTop: Math.max(insets.top, 20) + 20,
+                    transform: [{ translateY: headerTranslateY }],
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 1000,
+                }
+            ]}>
                 <Text style={styles.title}>Quran Verses</Text>
-            </View>
+            </Animated.View>
 
-            {currentVerse && currentChapter && settings && (
-                <View style={styles.content}>
-                    <VerseCard
-                        verse={currentVerse}
-                        chapter={currentChapter}
-                        showArabic={settings.showArabic}
-                        showTranslation={settings.showTranslation}
-                    />
+            <ScrollView
+                style={styles.scrollView}
+                contentContainerStyle={{
+                    paddingTop: headerHeight + Math.max(insets.top, 20) + 20,
+                    paddingBottom: Math.max(insets.bottom, 16)
+                }}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+                }
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
+            >
 
-                    {/* Action Buttons */}
-                    <View style={styles.buttonRow}>
-                        <TouchableOpacity
-                            style={[styles.button, styles.primaryButton]}
-                            onPress={handleRefresh}
-                        >
-                            <Text style={styles.buttonText}>Next Verse</Text>
-                        </TouchableOpacity>
+                {currentVerse && currentChapter && settings && (
+                    <View style={styles.content}>
+                        <VerseCard
+                            verse={currentVerse}
+                            chapter={currentChapter}
+                            showArabic={settings.showArabic}
+                            showTranslation={settings.showTranslation}
+                        />
 
-                        <TouchableOpacity
-                            style={[
-                                styles.button,
-                                isFavorite ? styles.favoriteButton : styles.secondaryButton
-                            ]}
-                            onPress={toggleFavorite}
-                        >
-                            <Text style={[
-                                styles.buttonText,
-                                isFavorite ? styles.favoriteButtonText : styles.secondaryButtonText
-                            ]}>
-                                {isFavorite ? '♥ Favorited' : '♡ Favorite'}
-                            </Text>
-                        </TouchableOpacity>
+                        {/* Action Buttons */}
+                        <View style={styles.buttonRow}>
+                            <TouchableOpacity
+                                style={[styles.button, styles.primaryButton]}
+                                onPress={handleRefresh}
+                            >
+                                <Text style={styles.buttonText}>Next Verse</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[
+                                    styles.button,
+                                    isFavorite ? styles.favoriteButton : styles.secondaryButton
+                                ]}
+                                onPress={toggleFavorite}
+                            >
+                                <Text style={[
+                                    styles.buttonText,
+                                    isFavorite ? styles.favoriteButtonText : styles.secondaryButtonText
+                                ]}>
+                                    {isFavorite ? '♥ Favorited' : '♡ Favorite'}
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </View>
-            )}
-        </ScrollView>
+                )}
+            </ScrollView>
+        </View>
     );
 };
 
@@ -217,6 +269,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f5f5f5',
+    },
+    scrollView: {
+        flex: 1,
     },
     loadingContainer: {
         flex: 1,
@@ -233,6 +288,11 @@ const styles = StyleSheet.create({
         backgroundColor: '#2dd36f',
         paddingVertical: 20,
         paddingHorizontal: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
     },
     title: {
         fontSize: 24,
