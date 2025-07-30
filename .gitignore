@@ -23,8 +23,11 @@ build/
 dist/
 
 # React Native / Expo generated native code
-android/
-ios/
+/android/
+/ios/
+
+# But keep native templates
+!native-templates/
 
 # Metro
 .metro-health-check*
