@@ -14,7 +14,7 @@ const widgetConfig: WithAndroidWidgetsParams = {
             targetCellWidth: 4,
             targetCellHeight: 2,
             description: "Display daily Quran verses on your home screen", // Description shown in the widget picker
-            previewImage: "./assets/widget-preview/quran-widget.png", // Path to widget preview image
+            previewImage: "./assets/widget-preview/widget_preview.png", // Path to widget preview image
             // Update every 30 minutes (minimum allowed)
             updatePeriodMillis: 1800000,
         },
@@ -45,6 +45,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
             backgroundColor: "#2dd36f",
         },
         package: "com.quranwidget.app",
+        edgeToEdgeEnabled: false,
     },
     web: {
         favicon: "./assets/favicon.png",
