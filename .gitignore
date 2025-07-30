@@ -8,6 +8,12 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
+# Package manager lock files (keep only package-lock.json for npm)
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+.bunfig.toml
+
 # Expo
 .expo/
 dist/
