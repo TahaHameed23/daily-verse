@@ -144,7 +144,3 @@ MIT License - see LICENSE file for details.
 ## Data Source
 
 Verses provided by QuranAPI (https://quranapi.pages.dev/)
-
----
-
-Made for the Muslim community
