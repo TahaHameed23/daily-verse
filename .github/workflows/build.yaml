@@ -28,6 +28,7 @@ jobs:
                       ${{ runner.os }}-gradle-
 
             - name: Build APK
+              working-directory: android
               run: ./gradlew assembleDebug
 
             - name: Upload APK
