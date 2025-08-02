@@ -26,19 +26,12 @@ jobs:
                   distribution: "adopt"
                   java-version: "11"
 
-            - name: Install Gradle
-              run: |
-                  wget https://services.gradle.org/distributions/gradle-7.5.1-bin.zip
-                  unzip gradle-7.5.1-bin.zip
-                  sudo mv gradle-7.5.1 /opt/gradle
-                  export PATH=$PATH:/opt/gradle/gradle-7.5.1/bin
-
-            - name: Build APK
+            - name: Build Android APK (Preview)
               working-directory: android
-              run: ./gradlew assembleRelease
+              run: ./gradlew assemblePreview
 
             - name: Upload APK
               uses: actions/upload-artifact@v4
               with:
                   name: app-apk
-                  path: android/app/build/outputs/apk/release/app-release.apk
+                  path: android/app/build/outputs/apk/preview/app-preview.apk

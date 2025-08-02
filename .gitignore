@@ -28,9 +28,7 @@ out/
 build/
 dist/
 
-# React Native / Expo generated native code
-/android/
-/ios/
+
 
 # But keep native templates
 !native-templates/
