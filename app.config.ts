@@ -8,15 +8,15 @@ const widgetConfig: WithAndroidWidgetsParams = {
         {
             name: "QuranVerse", // This name will be the name with which we reference our widget
             label: "Quran Verses Widget", // Label shown in the widget picker
-            minWidth: "250dp",
-            minHeight: "110dp",
-            // This means the widget's default size is 4x2 cells
-            targetCellWidth: 4,
-            targetCellHeight: 2,
+            minWidth: "350dp",
+            minHeight: "250dp",
+            // This means the widget's default size is 5x4 cells (larger)
+            targetCellWidth: 5,
+            targetCellHeight: 4,
             description: "Display daily Quran verses on your home screen", // Description shown in the widget picker
             previewImage: "./assets/widget-preview/widget_preview_img.png", // Path to widget preview image
-            // Update every 30 minutes (minimum allowed)
-            updatePeriodMillis: 1800000,
+            // Update every 1 minute for responsive updates
+            updatePeriodMillis: 60000,
         },
     ],
 };

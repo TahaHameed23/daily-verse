@@ -1,4 +1,4 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppSettings, QuranVerse, Chapter } from "../types";
 
 class StorageService {
@@ -20,7 +20,7 @@ class StorageService {
 
             // Return default settings
             return {
-                refreshFrequency: "daily",
+                refreshFrequency: "every2hours",
                 showArabic: true,
                 showTranslation: true,
                 widgetTheme: "auto",
@@ -30,7 +30,7 @@ class StorageService {
             console.error("Failed to get settings:", error);
             // Return default settings on error
             return {
-                refreshFrequency: "daily",
+                refreshFrequency: "every2hours",
                 showArabic: true,
                 showTranslation: true,
                 widgetTheme: "auto",
@@ -44,7 +44,10 @@ class StorageService {
      */
     async saveSettings(settings: AppSettings): Promise<void> {
         try {
-            await AsyncStorage.setItem(this.SETTINGS_KEY, JSON.stringify(settings));
+            await AsyncStorage.setItem(
+                this.SETTINGS_KEY,
+                JSON.stringify(settings)
+            );
         } catch (error) {
             console.error("Failed to save settings:", error);
             throw error;
@@ -136,7 +139,10 @@ class StorageService {
                     )
             );
 
-            await AsyncStorage.setItem(this.FAVORITES_KEY, JSON.stringify(filtered));
+            await AsyncStorage.setItem(
+                this.FAVORITES_KEY,
+                JSON.stringify(filtered)
+            );
         } catch (error) {
             console.error("Failed to remove from favorites:", error);
             throw error;

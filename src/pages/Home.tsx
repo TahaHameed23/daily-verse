@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
     View,
     Text,
@@ -9,17 +9,20 @@ import {
     Alert,
     ActivityIndicator,
     Switch,
-    Animated
+    Animated,
+    Linking,
+    AppState
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 
 import { verseManager } from '../services/verseManager';
 import { storageService } from '../services/storage';
 import { widgetService } from '../services/widgetService';
+import { backgroundRefreshService } from '../services/backgroundRefreshService';
 import { QuranVerse, Chapter, AppSettings } from '../types';
 
 import VerseCard from '../components/VerseCard';
-import Widget from '../components/Widget';
 
 const Home: React.FC = () => {
     const [currentVerse, setCurrentVerse] = useState<QuranVerse | null>(null);
@@ -28,6 +31,7 @@ const Home: React.FC = () => {
     const [refreshing, setRefreshing] = useState(false);
     const [settings, setSettings] = useState<AppSettings | null>(null);
     const [isFavorite, setIsFavorite] = useState(false);
+    const [nextRefreshTime, setNextRefreshTime] = useState<{ hours: number; minutes: number } | null>(null);
     const insets = useSafeAreaInsets();
 
     // Header animation
@@ -43,7 +47,162 @@ const Home: React.FC = () => {
 
     useEffect(() => {
         loadInitialData();
+
+        // Initialize background refresh service
+        backgroundRefreshService.initialize();
+
+        // Handle deep links from app shortcuts
+        const handleDeepLink = (url: string) => {
+            if (url.includes('verses://refresh')) {
+                // Trigger a refresh when coming from "Fresh Verse" shortcut
+                setTimeout(() => handleRefresh(), 500); // Small delay to ensure app is loaded
+            } else if (url.includes('verses://widget')) {
+                // Show widget instructions when coming from "Add Widget" shortcut
+                setTimeout(() => {
+                    Alert.alert(
+                        'Add Widget',
+                        'To add the Quran Verses widget:\n\n1. Long press on your home screen\n2. Tap "Widgets"\n3. Find "Quran Verses Widget"\n4. Drag it to your home screen',
+                        [{ text: 'Got it!' }]
+                    );
+                }, 500);
+            }
+        };
+
+        // Check if app was opened via deep link
+        Linking.getInitialURL().then((url) => {
+            if (url) {
+                handleDeepLink(url);
+            }
+        });
+
+        // Listen for deep link events while app is running
+        const linkingSubscription = Linking.addEventListener('url', (event) => {
+            handleDeepLink(event.url);
+        });
+
+        // Handle app state changes to check for widget refresh
+        const handleAppStateChange = async (nextAppState: string) => {
+            if (nextAppState === 'active') {
+                console.log('App became active, checking for widget refresh...');
+                const widgetRefreshRequested = await widgetService.checkWidgetRefreshRequest();
+                if (widgetRefreshRequested) {
+                    console.log("Widget refresh detected - triggering verse refresh");
+                    // Inline refresh logic
+                    try {
+                        setRefreshing(true);
+                        const verseData = await verseManager.refreshVerse();
+                        setCurrentVerse(verseData.verse);
+                        setCurrentChapter(verseData.chapter);
+
+                        // Update native widget with new verse
+                        if (settings) {
+                            await updateNativeWidget(verseData.verse, verseData.chapter, settings);
+                        }
+
+                        // Check if new verse is in favorites
+                        const favorites = await storageService.getFavoriteVerses();
+                        const isInFavorites = favorites.some(fav => fav.verse.surahNo === verseData.verse.surahNo && fav.verse.ayahNo === verseData.verse.ayahNo);
+                        setIsFavorite(isInFavorites);
+                    } catch (error) {
+                        console.error('Failed to refresh verse from widget:', error);
+                        Alert.alert('Error', 'Failed to load new verse.');
+                    } finally {
+                        setRefreshing(false);
+                    }
+                }
+
+                // Check if auto-refresh occurred while app was in background
+                const autoRefreshOccurred = await backgroundRefreshService.checkAutoRefreshOccurred();
+                if (autoRefreshOccurred) {
+                    console.log("Auto-refresh occurred - reloading current verse");
+                    // Reload the current verse to reflect auto-refresh changes
+                    const current = await storageService.getCurrentVerse();
+                    if (current) {
+                        setCurrentVerse(current.verse);
+                        setCurrentChapter(current.chapter);
+
+                        // Check if new verse is in favorites
+                        const favorites = await storageService.getFavoriteVerses();
+                        const isInFavorites = favorites.some(fav => fav.verse.surahNo === current.verse.surahNo && fav.verse.ayahNo === current.verse.ayahNo);
+                        setIsFavorite(isInFavorites);
+                    }
+                }
+            }
+        };
+
+        // Listen for app state changes
+        const appStateSubscription = AppState.addEventListener('change', handleAppStateChange);
+
+        return () => {
+            linkingSubscription?.remove();
+            appStateSubscription?.remove();
+            backgroundRefreshService.cleanup();
+        };
     }, []);
+
+    // Update widget when screen comes into focus
+    useFocusEffect(
+        useCallback(() => {
+            const updateWidgetOnFocus = async () => {
+                if (currentVerse && currentChapter && settings) {
+                    await updateNativeWidget(currentVerse, currentChapter, settings);
+                }
+
+                // Also check for widget refresh when screen comes into focus
+                const widgetRefreshRequested = await widgetService.checkWidgetRefreshRequest();
+                if (widgetRefreshRequested) {
+                    console.log("Widget refresh detected on focus - triggering verse refresh");
+                    // Call handleRefresh directly without adding to deps
+                    try {
+                        setRefreshing(true);
+                        const verseData = await verseManager.refreshVerse();
+                        setCurrentVerse(verseData.verse);
+                        setCurrentChapter(verseData.chapter);
+
+                        // Update native widget with new verse
+                        await updateNativeWidget(verseData.verse, verseData.chapter, settings);
+
+                        // Check if new verse is in favorites
+                        const favorites = await storageService.getFavoriteVerses();
+                        const isInFavorites = favorites.some(fav => fav.verse.surahNo === verseData.verse.surahNo && fav.verse.ayahNo === verseData.verse.ayahNo);
+                        setIsFavorite(isInFavorites);
+                    } catch (error) {
+                        console.error('Failed to refresh verse from widget:', error);
+                        Alert.alert('Error', 'Failed to load new verse.');
+                    } finally {
+                        setRefreshing(false);
+                    }
+                }
+            };
+            updateWidgetOnFocus();
+        }, [currentVerse, currentChapter, settings])
+    );
+
+    // Update next refresh time periodically
+    useEffect(() => {
+        const updateNextRefreshTime = async () => {
+            const time = await backgroundRefreshService.getTimeUntilNextRefresh();
+            setNextRefreshTime(time);
+        };
+
+        updateNextRefreshTime();
+        const interval = setInterval(updateNextRefreshTime, 60000); // Update every minute
+
+        return () => clearInterval(interval);
+    }, [settings]);
+
+    // Update next refresh time periodically
+    useEffect(() => {
+        const updateNextRefreshTime = async () => {
+            const time = await backgroundRefreshService.getTimeUntilNextRefresh();
+            setNextRefreshTime(time);
+        };
+
+        updateNextRefreshTime();
+        const interval = setInterval(updateNextRefreshTime, 60000); // Update every minute
+
+        return () => clearInterval(interval);
+    }, [settings]);
 
     const loadInitialData = async () => {
         try {
@@ -88,6 +247,9 @@ const Home: React.FC = () => {
             const favorites = await storageService.getFavoriteVerses();
             const isInFavorites = favorites.some(fav => fav.verse.surahNo === verseData.verse.surahNo && fav.verse.ayahNo === verseData.verse.ayahNo);
             setIsFavorite(isInFavorites);
+
+            // Reset the background refresh timer since user manually refreshed
+            await backgroundRefreshService.resetRefreshTimer();
 
         } catch (error) {
             console.error('Failed to refresh verse:', error);
@@ -252,6 +414,15 @@ const Home: React.FC = () => {
                                 </Text>
                             </TouchableOpacity>
                         </View>
+
+                        {/* Next Refresh Time */}
+                        {nextRefreshTime && settings.refreshFrequency !== 'manual' && (
+                            <View style={styles.nextRefreshContainer}>
+                                <Text style={styles.nextRefreshText}>
+                                    Next auto refresh in: {nextRefreshTime.hours}h {nextRefreshTime.minutes}m
+                                </Text>
+                            </View>
+                        )}
                     </View>
                 )}
             </ScrollView>
@@ -389,6 +560,18 @@ const styles = StyleSheet.create({
     },
     themeToggleText: {
         fontSize: 20,
+    },
+    nextRefreshContainer: {
+        backgroundColor: '#e8f5e8',
+        padding: 12,
+        borderRadius: 8,
+        marginTop: 16,
+        alignItems: 'center',
+    },
+    nextRefreshText: {
+        fontSize: 14,
+        color: '#2dd36f',
+        fontWeight: '500',
     },
 });
 

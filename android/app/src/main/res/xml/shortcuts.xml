@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Widget Shortcuts -->
+    <shortcut
+        android:shortcutId="add_quran_widget"
+        android:enabled="true"
+        android:icon="@drawable/ic_widget_shortcut"
+        android:shortcutShortLabel="@string/shortcut_widget_short"
+        android:shortcutLongLabel="@string/shortcut_widget_long"
+        android:shortcutDisabledMessage="@string/shortcut_widget_disabled">
+        <intent
+            android:action="android.intent.action.MAIN"
+            android:targetPackage="com.quranwidget.app"
+            android:targetClass="com.quranwidget.app.MainActivity"
+            android:data="verses://widget" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+
+    <!-- App Shortcut to go directly to home with fresh verse -->
+    <shortcut
+        android:shortcutId="fresh_verse"
+        android:enabled="true"
+        android:icon="@drawable/ic_refresh_shortcut"
+        android:shortcutShortLabel="@string/shortcut_verse_short"
+        android:shortcutLongLabel="@string/shortcut_verse_long">
+        <intent
+            android:action="android.intent.action.MAIN"
+            android:targetPackage="com.quranwidget.app"
+            android:targetClass="com.quranwidget.app.MainActivity"
+            android:data="verses://refresh" />
+        <categories android:name="android.shortcut.conversation" />
+    </shortcut>
+</shortcuts>

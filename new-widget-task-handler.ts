@@ -2,7 +2,6 @@ import React from "react";
 import type { WidgetTaskHandlerProps } from "react-native-android-widget";
 import { FlexWidget, TextWidget } from "react-native-android-widget";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { requestWidgetUpdate } from "react-native-android-widget";
 
 // Dynamic widget function that accepts props
 const createQuranWidget = (
@@ -14,46 +13,19 @@ const createQuranWidget = (
 ) => {
     const children = [];
 
-    // Header with chapter info and refresh button
+    // Header with chapter info
     children.push(
-        React.createElement(
-            FlexWidget,
-            {
-                key: "header-row",
-                style: {
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: 8,
-                    width: "match_parent",
-                },
+        React.createElement(TextWidget, {
+            key: "chapter-info",
+            text: chapterInfo,
+            style: {
+                fontSize: 13,
+                color: "#666666",
+                textAlign: "center",
+                fontWeight: "bold",
+                marginBottom: 8,
             },
-            [
-                React.createElement(TextWidget, {
-                    key: "chapter-info",
-                    text: chapterInfo,
-                    style: {
-                        fontSize: 13,
-                        color: "#666666",
-                        fontWeight: "bold",
-                    },
-                }),
-                React.createElement(TextWidget, {
-                    key: "refresh-button",
-                    text: "↻", // Unicode refresh symbol that's more reliable than emoji
-                    clickAction: "REFRESH_VERSE",
-                    style: {
-                        fontSize: 18,
-                        color: "#2dd36f",
-                        fontWeight: "bold",
-                        padding: 6,
-                        backgroundColor: "#f8f9fa",
-                        borderRadius: 16,
-                        textAlign: "center",
-                    },
-                }),
-            ]
-        )
+        })
     );
 
     // Arabic text (if enabled)
@@ -89,11 +61,9 @@ const createQuranWidget = (
         );
     }
 
-    // Main container with click to open app
     return React.createElement(
         FlexWidget,
         {
-            clickAction: "OPEN_APP", // Opens the app when widget is tapped
             style: {
                 height: "match_parent",
                 width: "match_parent",
@@ -111,37 +81,15 @@ const createQuranWidget = (
 export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
     console.log("Widget action:", props.widgetAction);
 
-    // Handle click actions
-    if (props.widgetAction === "WIDGET_CLICK") {
-        console.log("Widget clicked:", props.clickAction);
-
-        if (props.clickAction === "REFRESH_VERSE") {
-            console.log(
-                "Refresh button clicked - storing refresh request with timestamp"
-            );
-            try {
-                // Store refresh request with timestamp for immediate detection
-                const timestamp = Date.now().toString();
-                await AsyncStorage.setItem("widgetRefreshRequested", "true");
-                await AsyncStorage.setItem("widgetRefreshTimestamp", timestamp);
-                console.log(
-                    "Widget refresh request stored with timestamp:",
-                    timestamp
-                );
-            } catch (error) {
-                console.error("Failed to store widget refresh request:", error);
-            }
-            return;
-        }
-    }
-
     try {
         // Load saved verse data from AsyncStorage
         const savedVerse = await AsyncStorage.getItem("currentVerse");
         const settings = await AsyncStorage.getItem("widgetSettings");
+        const lastUpdate = await AsyncStorage.getItem("lastWidgetUpdate");
 
         console.log("Saved verse data:", savedVerse);
         console.log("Widget settings:", settings);
+        console.log("Last update timestamp:", lastUpdate);
 
         const verseData = savedVerse ? JSON.parse(savedVerse) : null;
         const widgetSettings = settings

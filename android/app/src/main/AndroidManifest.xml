@@ -21,15 +21,13 @@
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
-    </activity>
-    <receiver android:name=".QuranWidgetProvider" android:exported="true">
       <intent-filter>
-        <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
-        <action android:name="com.quranwidget.app.REFRESH"/>
-        <action android:name="com.quranwidget.app.FAVORITE"/>
+        <action android:name="android.intent.action.VIEW"/>
+        <category android:name="android.intent.category.DEFAULT"/>
+        <data android:scheme="verses"/>
       </intent-filter>
-      <meta-data android:name="android.appwidget.provider" android:resource="@xml/quran_widget_info"/>
-    </receiver>
+      <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts"/>
+    </activity>
     <receiver android:name=".widget.QuranVerse" android:exported="false" android:label="Quran Verses Widget">
       <intent-filter>
         <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>

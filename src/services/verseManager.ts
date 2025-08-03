@@ -1,6 +1,7 @@
 import { quranAPI } from "./quranAPI";
 import { storageService } from "./storage";
 import { QuranVerse, Chapter } from "../types";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 class VerseManagerService {
     /**
@@ -94,9 +95,38 @@ class VerseManagerService {
                 return false; // Manual refresh only
             }
 
-            // For scheduled updates, check the last update time
-            // This would need timestamp tracking - simplified for now
-            return true; // For now, always allow update for daily/weekly
+            // Check the last auto-refresh timestamp
+            const lastAutoRefresh = await AsyncStorage.getItem(
+                "lastAutoRefresh"
+            );
+            if (!lastAutoRefresh) {
+                return true; // No previous auto-refresh, should update
+            }
+
+            const lastRefreshTime = parseInt(lastAutoRefresh);
+            const now = Date.now();
+            const timeSinceLastRefresh = now - lastRefreshTime;
+
+            // Calculate refresh interval based on settings
+            let refreshInterval: number;
+            switch (settings.refreshFrequency) {
+                case "hourly":
+                    refreshInterval = 60 * 60 * 1000; // 1 hour
+                    break;
+                case "every2hours":
+                    refreshInterval = 2 * 60 * 60 * 1000; // 2 hours
+                    break;
+                case "daily":
+                    refreshInterval = 24 * 60 * 60 * 1000; // 24 hours
+                    break;
+                case "weekly":
+                    refreshInterval = 7 * 24 * 60 * 60 * 1000; // 7 days
+                    break;
+                default:
+                    refreshInterval = 2 * 60 * 60 * 1000; // Default to 2 hours
+            }
+
+            return timeSinceLastRefresh >= refreshInterval;
         } catch (error) {
             console.error("Failed to check if should update verse:", error);
             return true; // Default to updating on error

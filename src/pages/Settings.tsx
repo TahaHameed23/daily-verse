@@ -397,6 +397,8 @@ const Settings: React.FC = () => {
                             selectedValue={settings.refreshFrequency}
                             onValueChange={(value) => updateSetting('refreshFrequency', value)}
                         >
+                            <PickerItem label="Every Hour" value="hourly" />
+                            <PickerItem label="Every 2 Hours" value="every2hours" />
                             <PickerItem label="Daily" value="daily" />
                             <PickerItem label="Weekly" value="weekly" />
                             <PickerItem label="Manual Only" value="manual" />

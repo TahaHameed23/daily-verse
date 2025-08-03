@@ -51,7 +51,7 @@ export interface VerseDisplayData {
 }
 
 export interface AppSettings {
-    refreshFrequency: "daily" | "weekly" | "manual";
+    refreshFrequency: "hourly" | "every2hours" | "daily" | "weekly" | "manual";
     showArabic: boolean;
     showTranslation: boolean;
     widgetTheme: "light" | "dark" | "auto";
