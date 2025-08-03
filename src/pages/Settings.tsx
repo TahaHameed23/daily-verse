@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { storageService } from '../services/storage';
 import { verseManager } from '../services/verseManager';
+import { widgetService } from '../services/widgetService';
 import { AppSettings } from '../types';
 import Widget from '../components/Widget';
 
@@ -133,6 +134,19 @@ const Settings: React.FC = () => {
             await storageService.saveSettings(newSettings);
             setSettings(newSettings);
             showToast('Settings saved');
+
+            // Update widget if Arabic/Translation settings changed
+            if (key === 'showArabic' || key === 'showTranslation') {
+                try {
+                    const currentVerse = await verseManager.getCurrentOrNextVerse();
+                    if (currentVerse) {
+                        await widgetService.updateWidget(currentVerse.verse, currentVerse.chapter, newSettings);
+                    }
+                } catch (error) {
+                    console.error('Failed to update widget:', error);
+                    // Don't show error to user as widget might not be available
+                }
+            }
         } catch (error) {
             console.error('Failed to save setting:', error);
             showToast('Failed to save settings');

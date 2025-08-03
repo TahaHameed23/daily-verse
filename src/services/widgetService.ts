@@ -27,6 +27,9 @@ export const widgetService = {
                 showTranslation: settings.showTranslation,
             };
 
+            console.log("Saving widget data:", verseData);
+            console.log("Saving widget settings:", widgetSettings);
+
             // Save to AsyncStorage so the widget task handler can access it
             await AsyncStorage.setItem(
                 "currentVerse",
@@ -37,7 +40,7 @@ export const widgetService = {
                 JSON.stringify(widgetSettings)
             );
 
-            console.log("Widget data updated successfully");
+            console.log("Widget data saved successfully to AsyncStorage");
         } catch (error) {
             console.error("Failed to update widget data:", error);
             throw error;

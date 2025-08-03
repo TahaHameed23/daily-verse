@@ -15,61 +15,29 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
 
     switch (props.widgetAction) {
         case "WIDGET_ADDED":
+            console.log("Widget added, testing with hardcoded data...");
+            
+            // First test with hardcoded data to see if widget renders
+            props.renderWidget(
+                React.createElement(Widget, {
+                    chapterInfo: "Al-Fatiha 1:1",
+                    arabicText: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+                    translationText: "In the name of Allah, the Most Gracious, the Most Merciful",
+                    showArabic: true,
+                    showTranslation: true,
+                })
+            );
+            break;
+
+        case "WIDGET_UPDATE":
             try {
+                console.log("Widget update, loading data from AsyncStorage...");
                 // Load saved verse data from AsyncStorage
                 const savedVerse = await AsyncStorage.getItem("currentVerse");
                 const settings = await AsyncStorage.getItem("widgetSettings");
 
-                const verseData = savedVerse ? JSON.parse(savedVerse) : null;
-                const widgetSettings = settings
-                    ? JSON.parse(settings)
-                    : {
-                          showArabic: true,
-                          showTranslation: true,
-                      };
-
-                if (verseData) {
-                    props.renderWidget(
-                        React.createElement(Widget, {
-                            chapterInfo: `${verseData.chapter}:${verseData.verse}`,
-                            arabicText: verseData.arabic || "",
-                            translationText:
-                                verseData.translation || "Loading verse...",
-                            showArabic: widgetSettings.showArabic,
-                            showTranslation: widgetSettings.showTranslation,
-                        })
-                    );
-                } else {
-                    // Default widget when no verse is loaded
-                    props.renderWidget(
-                        React.createElement(Widget, {
-                            chapterInfo: "Loading...",
-                            arabicText: "",
-                            translationText: "Loading verse...",
-                            showArabic: widgetSettings.showArabic,
-                            showTranslation: widgetSettings.showTranslation,
-                        })
-                    );
-                }
-            } catch (error) {
-                console.error("Error loading widget data:", error);
-                props.renderWidget(
-                    React.createElement(Widget, {
-                        chapterInfo: "Error",
-                        arabicText: "",
-                        translationText: "Failed to load verse",
-                        showArabic: true,
-                        showTranslation: true,
-                    })
-                );
-            }
-            break;
-
-        case "WIDGET_UPDATE":
-            // Handle widget updates (when data changes)
-            try {
-                const savedVerse = await AsyncStorage.getItem("currentVerse");
-                const settings = await AsyncStorage.getItem("widgetSettings");
+                console.log("Saved verse data:", savedVerse);
+                console.log("Widget settings:", settings);
 
                 const verseData = savedVerse ? JSON.parse(savedVerse) : null;
                 const widgetSettings = settings
@@ -82,7 +50,7 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
                 if (verseData) {
                     props.renderWidget(
                         React.createElement(Widget, {
-                            chapterInfo: `${verseData.chapter}:${verseData.verse}`,
+                            chapterInfo: `${verseData.chapter} ${verseData.verse}`,
                             arabicText: verseData.arabic || "",
                             translationText:
                                 verseData.translation ||
@@ -91,9 +59,30 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
                             showTranslation: widgetSettings.showTranslation,
                         })
                     );
+                } else {
+                    // Fallback to hardcoded data if no saved data
+                    props.renderWidget(
+                        React.createElement(Widget, {
+                            chapterInfo: "Al-Fatiha 1:1",
+                            arabicText: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+                            translationText: "In the name of Allah, the Most Gracious, the Most Merciful",
+                            showArabic: widgetSettings.showArabic,
+                            showTranslation: widgetSettings.showTranslation,
+                        })
+                    );
                 }
             } catch (error) {
                 console.error("Error updating widget:", error);
+                // Fallback widget
+                props.renderWidget(
+                    React.createElement(Widget, {
+                        chapterInfo: "Error",
+                        arabicText: "",
+                        translationText: "Failed to load verse data",
+                        showArabic: true,
+                        showTranslation: true,
+                    })
+                );
             }
             break;
 

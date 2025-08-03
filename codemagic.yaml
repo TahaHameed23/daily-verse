@@ -1,7 +1,27 @@
 workflows:
-    sample-workflow:
-        name: Codemagic Workflow
+  sample-workflow:
+    name: Codemagic Workflow
+    max_build_duration: 120
+    instance_type: mac_mini_m2
 
-        max_build_duration: 120
+    environment:
+      vars:
+        EAS_BUILD_PLATFORM: android
+      node: 18
+      npm: 8
+      # Optional: for EAS auth
+      EXPO_TOKEN: <your_expo_token>
 
-        instance_type: mac_mini_m2
+    scripts:
+      - name: Install dependencies
+        script: |
+          npm install
+
+      - name: EAS build Android
+        script: |
+          npx eas-cli build --platform android --non-interactive --profile preview
+
+    artifacts:
+      - /Users/builder/Library/Developer/Xcode/DerivedData/**/Build/Products/**/*.apk
+      - /Users/builder/Library/Developer/Xcode/DerivedData/**/Build/Products/**/*.aab
+      - dist/**/*.apk
