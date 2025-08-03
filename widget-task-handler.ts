@@ -16,13 +16,14 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
     switch (props.widgetAction) {
         case "WIDGET_ADDED":
             console.log("Widget added, testing with hardcoded data...");
-            
+
             // First test with hardcoded data to see if widget renders
             props.renderWidget(
                 React.createElement(Widget, {
                     chapterInfo: "Al-Fatiha 1:1",
                     arabicText: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-                    translationText: "In the name of Allah, the Most Gracious, the Most Merciful",
+                    translationText:
+                        "In the name of Allah, the Most Gracious, the Most Merciful",
                     showArabic: true,
                     showTranslation: true,
                 })
@@ -64,8 +65,10 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
                     props.renderWidget(
                         React.createElement(Widget, {
                             chapterInfo: "Al-Fatiha 1:1",
-                            arabicText: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-                            translationText: "In the name of Allah, the Most Gracious, the Most Merciful",
+                            arabicText:
+                                "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+                            translationText:
+                                "In the name of Allah, the Most Gracious, the Most Merciful",
                             showArabic: widgetSettings.showArabic,
                             showTranslation: widgetSettings.showTranslation,
                         })
